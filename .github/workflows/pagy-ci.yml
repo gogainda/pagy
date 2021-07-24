@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - ruby-version: 2.5
+          - ruby-version: truffleruby-head
             env:
               NONE: true
           - ruby-version: 2.6
