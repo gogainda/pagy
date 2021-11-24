@@ -14,14 +14,14 @@ ul.uk-pagination.uk-flex-center
 
     - elsif item.is_a?(String)
       li.uk-active
-        span== item
+        span== pagy.label_for(item)
 
     - elsif item == :gap
       li.uk-disabled
         span== pagy_t('pagy.nav.gap')
 
   - if pagy.next
-    li== link.call(p_next, "<span uk-pagination-next>#{pagy_t('pagy.nav.next')}</span>")
+    li== link.call(pagy.next, "<span uk-pagination-next>#{pagy_t('pagy.nav.next')}</span>")
   - else
     li.uk-disabled
       a href="#"

@@ -2,46 +2,95 @@
 
 require_relative '../../test_helper'
 require 'pagy/extras/headers'
+require 'pagy/extras/calendar'
 require 'pagy/extras/countless'
 
-describe 'pagy/extras/headers' do
+require_relative '../../mock_helpers/collection'
+require_relative '../../mock_helpers/app'
 
+describe 'pagy/extras/headers' do
   describe '#pagy_headers' do
+    let(:app) { MockApp.new }
     before do
-      @controller = MockController.new
       @collection = MockCollection.new
     end
     it 'returns the full headers hash' do
-      pagy, _records = @controller.send(:pagy, @collection)
-      _(@controller.send(:pagy_headers, pagy)).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=2>; rel=\"prev\", <https://example.com:8080/foo?page=4>; rel=\"next\", <https://example.com:8080/foo?page=50>; rel=\"last\"", "Current-Page"=>"3", "Page-Items"=>"20", "Total-Pages"=>"50", "Total-Count"=>"1000"})
+      pagy, _records = app.send(:pagy, @collection)
+      _(app.send(:pagy_headers, pagy)).must_rematch
     end
     it 'returns custom headers hash' do
-      pagy, _records = @controller.send(:pagy, @collection, headers:{items:'Per-Page', count: 'Total', pages:false})
-      _(@controller.send(:pagy_headers, pagy)).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=2>; rel=\"prev\", <https://example.com:8080/foo?page=4>; rel=\"next\", <https://example.com:8080/foo?page=50>; rel=\"last\"", "Per-Page"=>"20", "Total"=>"1000"})
+      pagy, _records = app.send(:pagy, @collection, headers: { items: 'Per-Page', count: 'Total', pages: false })
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'returns custom headers hash' do
+      pagy, _records = app.send(:pagy, @collection, headers: { items: false, count: false })
+      _(app.send(:pagy_headers, pagy)).must_rematch
     end
     it 'returns the countless headers hash' do
-      pagy, _records = @controller.send(:pagy_countless, @collection)
-      _(@controller.send(:pagy_headers, pagy)).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=2>; rel=\"prev\", <https://example.com:8080/foo?page=4>; rel=\"next\"", "Current-Page"=>"3", "Page-Items"=>"20"})
+      pagy, _records = app.send(:pagy_countless, @collection)
+      _(app.send(:pagy_headers, pagy)).must_rematch
     end
     it 'omit prev on first page' do
-      pagy, _records = @controller.send(:pagy, @collection, page: 1)
-      _(@controller.send(:pagy_headers, pagy)).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=2>; rel=\"next\", <https://example.com:8080/foo?page=50>; rel=\"last\"", "Current-Page"=>"1", "Page-Items"=>"20", "Total-Pages"=>"50", "Total-Count"=>"1000"})
+      pagy, _records = app.send(:pagy, @collection, page: 1)
+      _(app.send(:pagy_headers, pagy)).must_rematch
     end
     it 'omit next on last page' do
-      pagy, _records = @controller.send(:pagy, @collection, page: 50)
-      _(@controller.send(:pagy_headers, pagy)).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=49>; rel=\"prev\", <https://example.com:8080/foo?page=50>; rel=\"last\"", "Current-Page"=>"50", "Page-Items"=>"20", "Total-Pages"=>"50", "Total-Count"=>"1000"})
+      pagy, _records = app.send(:pagy, @collection, page: 50)
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+  end
+
+  describe '#pagy_headers with Calendar' do
+    let(:app) { MockApp::Calendar.new }
+    before do
+      @collection = MockCollection::Calendar.new
+    end
+    it 'returns the full headers hash' do
+      pagy, _records = app.send(:pagy, @collection)
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'returns custom headers hash' do
+      pagy, _records = app.send(:pagy, @collection, headers: { items: 'Per-Page', count: 'Total', pages: false })
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'returns custom headers hash' do
+      pagy, _records = app.send(:pagy, @collection, headers: { items: false, count: false })
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'returns the countless headers hash' do
+      pagy, _records = app.send(:pagy_countless, @collection)
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'omit prev on first page' do
+      pagy, _records = app.send(:pagy, @collection, page: 1)
+      _(app.send(:pagy_headers, pagy)).must_rematch
+    end
+    it 'omit next on last page' do
+      pagy, _records = app.send(:pagy, @collection, page: 26)
+      _(app.send(:pagy_headers, pagy)).must_rematch
     end
   end
 
   describe '#pagy_headers_merge' do
+    let(:app) { MockApp.new }
     before do
-      @controller = MockController.new
       @collection = MockCollection.new
     end
     it 'returns the full headers hash' do
-      pagy, _records = @controller.send(:pagy, @collection)
-      @controller.send(:pagy_headers_merge, pagy)
-      _(@controller.send(:response).headers).must_equal({"Link"=>"<https://example.com:8080/foo?page=1>; rel=\"first\", <https://example.com:8080/foo?page=2>; rel=\"prev\", <https://example.com:8080/foo?page=4>; rel=\"next\", <https://example.com:8080/foo?page=50>; rel=\"last\"", "Current-Page"=>"3", "Page-Items"=>"20", "Total-Pages"=>"50", "Total-Count"=>"1000"})
+      pagy, _records = app.send(:pagy, @collection)
+      app.send(:pagy_headers_merge, pagy)
+      _(app.send(:response).headers.to_hash).must_rematch
+    end
+  end
+  describe '#pagy_headers_merge with Calendar' do
+    let(:app) { MockApp::Calendar.new }
+    before do
+      @collection = MockCollection::Calendar.new
+    end
+    it 'returns the full headers hash' do
+      pagy, _records = app.send(:pagy, @collection)
+      app.send(:pagy_headers_merge, pagy)
+      _(app.send(:response).headers.to_hash).must_rematch
     end
   end
 end

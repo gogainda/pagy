@@ -1,27 +1,25 @@
 # frozen_string_literal: true
 
 class Pagy
-
-  # generic variable error
+  # Generic variable error
   class VariableError < ArgumentError
-    attr_reader :pagy
+    attr_reader :pagy, :variable, :value
 
-    def initialize(pagy)
-      super
-      @pagy = pagy
-    end
-
-    def variable
-      message =~ /expected :(\w+)/
-      Regexp.last_match(1)&.to_sym
-    end
-
-    def value
-      pagy.vars[variable]
+    # Set the variables and prepare the message
+    def initialize(pagy, variable, description, value)
+      @pagy     = pagy
+      @variable = variable
+      @value    = value
+      super "expected :#{@variable} #{description}; got #{@value.inspect}"
     end
   end
 
-  # specific overflow error
+  # Specific overflow error
   class OverflowError < VariableError; end
 
+  # I18n configuration error
+  class I18nError < StandardError; end
+
+  # Generic internal error
+  class InternalError < StandardError; end
 end

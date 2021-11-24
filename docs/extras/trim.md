@@ -18,15 +18,15 @@ require 'pagy/extras/trim'
 
 # it will trim without any further configuration,
 
-# you can disable it explicitly for specific requests 
-@pagy, @records = pagy(Product.all, enable_trim_extra: false)
+# you can disable it explicitly for specific requests
+@pagy, @records = pagy(Product.all, trim_extra: false)
 
 # or...
 
 # disable it by default (opt-in)
-Pagy::VARS[:enable_trim_extra] = false   # default true
+Pagy::DEFAULT[:trim_extra] = false   # default true
 # in this case you have to enable it explicitly when you want the trimming
-@pagy, @records = pagy(Product.all, enable_trim_extra: true)
+@pagy, @records = pagy(Product.all, trim_extra: true)
 ```
 
 ## Files
@@ -35,13 +35,13 @@ Pagy::VARS[:enable_trim_extra] = false   # default true
 
 ## Variables
 
-| Variable             | Description                   | Default |
-|:---------------------|:------------------------------|:--------|
-| `:enable_trim_extra` | enable or disable the feature | `true`  |
+| Variable      | Description                   | Default |
+| :------------ | :---------------------------- | :------ |
+| `:trim_extra` | enable or disable the feature | `true`  |
 
-You can use the `:enable_trim_extra` variable to opt-out of trimming even when the extra is required (trimming by default).
+You can use the `:trim_extra` variable to opt-out of trimming even when the extra is required (trimming by default).
 
-You can set the `Pagy::VARS[:use_trim_extra]` default to `false` if you want to explicitly pass the `enable_trim_extra: true` variable in order to trim the page param.
+You can set the `Pagy::DEFAULT[:trim_extra]` default to `false` if you want to explicitly pass the `trim_extra: true` variable in order to trim the page param.
 
 ## Methods
 
@@ -49,5 +49,12 @@ The `trim` extra overrides the `pagy_link_proc` method in the `Pagy::Frontend` m
 
 ### pagy_link_proc(pagy, link_extra='')
 
-This method trims the `:page_param` param from the first page link.
+This method overrides the `pagy_link_proc` using the `pagy_trim` to process the link to the first page.
 
+### pagy_trim(pagy, link)
+
+Sub-method called only by the `pagy_link_proc` method, it removes the the `:page_param` param from the first page link (usually `page=1`).
+
+Override this method if you are [Customizing the urls](../how-to.md#customizing-the-url).
+
+If you use a `pagy_*nav_js` helper you should customize also the `Pagy.trim` javascript function.

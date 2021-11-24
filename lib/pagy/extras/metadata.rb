@@ -1,31 +1,24 @@
 # See the Pagy documentation: https://ddnexus.github.io/pagy/extras/metadata
 # frozen_string_literal: true
 
-class Pagy
+require 'pagy/url_helpers'
+
+class Pagy # :nodoc:
+  DEFAULT[:metadata] = %i[ scaffold_url first_url prev_url page_url next_url last_url
+                           count page items vars pages last in from to prev next series ]
+
   # Add a specialized backend method for pagination metadata
-  module Backend
-  private
+  module MetadataExtra
+    private
 
-    METADATA = %i[ scaffold_url first_url prev_url page_url next_url last_url
-                   count page items vars pages last from to prev next series
-               ].tap do |metadata|
-                 metadata << :sequels if VARS.key?(:steps)  # :steps gets defined along with the #sequels method
-               end.freeze
+    include UrlHelpers
 
-    VARS[:metadata] = METADATA.dup
-
-    include Helpers
-
-    def pagy_metadata(pagy, deprecated_url=nil, absolute: nil)
-      absolute = Pagy.deprecated_arg(:url, deprecated_url, :absolute, absolute) if deprecated_url
-      names   = pagy.vars[:metadata]
-      unknown = names - METADATA
-      raise VariableError.new(pagy), "unknown metadata #{unknown.inspect}" \
-            unless unknown.empty?
-
+    # Return the metadata hash
+    def pagy_metadata(pagy, absolute: nil)
       scaffold_url = pagy_url_for(pagy, PAGE_PLACEHOLDER, absolute: absolute)
       {}.tap do |metadata|
-        names.each do |key|
+        keys = defined?(Calendar) && pagy.is_a?(Calendar) ? pagy.vars[:metadata] - %i[count items] : pagy.vars[:metadata]
+        keys.each do |key|
           metadata[key] = case key
                           when :scaffold_url then scaffold_url
                           when :first_url    then scaffold_url.sub(PAGE_PLACEHOLDER, 1.to_s)
@@ -35,9 +28,11 @@ class Pagy
                           when :last_url     then scaffold_url.sub(PAGE_PLACEHOLDER, pagy.last.to_s)
                           else pagy.send(key)
                           end
+        rescue NoMethodError
+          raise VariableError.new(pagy, :metadata, 'to contain known keys', key)
         end
       end
     end
-
   end
+  Backend.prepend MetadataExtra
 end

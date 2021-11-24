@@ -3,7 +3,7 @@ title: Standalone
 ---
 # Standalone Extra
 
-This extra allows you to use pagy completely standalone, i.e. without any request object, nor Rack environment/gem, nor any defined `params` method, even in the irb/rails console witout an app (see the [Pagy::Console](../api/console.md) module).
+This extra allows you to use pagy completely standalone, i.e. without any request object, nor Rack environment/gem, nor any defined `params` method, even in the irb/rails console without an app (see the [Pagy::Console](../api/console.md) module).
 
 You may need it in order to paginate a collection outside of a regular rack request or controller, like in an unconventional API module, or in the irb/rails console or for testing/playing with backend and frontend methods.
 
@@ -15,15 +15,13 @@ This extra will also create a dummy `params` method (if not already defined) in 
 
 See [extras](../extras.md) for general usage info.
 
-#### Standard app or API
-
 In the `pagy.rb` initializer:
 
 ```ruby
 require 'pagy/extras/standalone'
 
 # optional: set a default url
-Pagy::Vars[:url] = 'http://www.example.com/subdir'
+Pagy::DEFAULT[:url] = 'http://www.example.com/subdir'
 
 # pass a :url variable to work in standalone mode (no need of any request object nor Rack env)
 @pagy, @records = pagy(Product.all, url: 'http://www.example.com/subdir', params: {...})
@@ -49,4 +47,4 @@ The `standalone` extra overrides the `pagy_url_for` method used internally. If i
 
 ### Dummy params method
 
-This extra creates a dummy `params` method (if not already defined) in the module where you include the `Pagy::Backend` (usually a controller). The method is called by pagy to retrive backend variables coming from the request, and expects a hash, so the dummy param method returns an empty hash avoiding an error.
+This extra creates a dummy `params` method (if not already defined) in the module where you include the `Pagy::Backend` (usually a controller). The method is called by pagy to retrieve backend variables coming from the request, and expects a hash, so the dummy param method returns an empty hash avoiding an error.

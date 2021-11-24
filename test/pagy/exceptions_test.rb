@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require_relative '../test_helper'
+require_relative '../mock_helpers/pagy_buggy'
 
 describe 'pagy/exceptions' do
-
   describe '#variable and #value' do
     it 'raises for non overflow pages' do
       begin

@@ -10,17 +10,16 @@ module PagyConsole
 end
 
 describe 'pagy/console' do
-
   describe 'Pagy::Console' do
     it 'defines default :url' do
-      _(Pagy::VARS[:url]).must_equal 'http://www.example.com/subdir'
+      _(Pagy::DEFAULT[:url]).must_equal 'http://www.example.com/subdir'
     end
     it 'includes Pagy::Backend and Pagy::Frontend' do
       assert PagyConsole <= Pagy::Backend
       assert PagyConsole <= Pagy::Frontend
     end
     it 'requires extras' do
-      PagyConsole.pagy_extras :array, :navs
+      _ { PagyConsole.pagy_extras :array, :navs }.must_output "Required extras: :array, :navs\n"
       _(Pagy::Backend.method_defined?(:pagy_array))
       _(Pagy::Frontend.method_defined?(:pagy_nav_js))
     end
